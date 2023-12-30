@@ -39,5 +39,7 @@ COPY --from=frontend /build/build/* /frontend/
 
 WORKDIR /backend
 
+ENV PORT 8000
+
 # run the server
-CMD waitress-serve --host 0.0.0.0 --port 8000 app:app
+CMD waitress-serve --host 0.0.0.0 --port ${PORT} app:app
