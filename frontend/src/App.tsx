@@ -63,6 +63,9 @@ function App()
   return (
     <div className="App">
       <h1>Total Compensation Graph</h1>
+      <br />
+        <p>Source: <a href="https://github.com/tkreindler/total-compensation">https://github.com/tkreindler/total-compensation</a></p>
+      <br />
       <Form
         initialState={requestPayload}
         submitCallback={async (request: RequestPayload) =>
