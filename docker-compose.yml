@@ -1,0 +1,8 @@
+version: "3.7"
+services:
+  total-compensation:
+    build: .
+    image: total-compensation
+    container_name: total-compensation
+    ports:
+      - 8000:8000
