@@ -5,7 +5,7 @@ This repo contains a website to easily plot out Total Compensation (TC) at Micro
 You can generate graphs that look something like this:
 
 <picture>
-  <img alt="logo" width="100%" src="https://github.com/tkreindler/Microsoft-Total-Compensation/blob/master/example.png">
+  <img alt="logo" width="100%" src="https://github.com/tkreindler/total-compensation/blob/master/example.png">
 </picture>
 
 This can be very useful for people like Software Engineers with very complex and varying pay over time
