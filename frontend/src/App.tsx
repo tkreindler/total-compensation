@@ -63,7 +63,6 @@ function App()
   return (
     <div className="App">
       <h1>Total Compensation Graph</h1>
-      <br />
         <p>Source: <a href="https://github.com/tkreindler/total-compensation">https://github.com/tkreindler/total-compensation</a></p>
       <br />
       <Form
@@ -79,6 +78,7 @@ function App()
         }}
         saveCallback={async payload => setCookie("payload", payload)}
       ></Form>
+      <br />
       {plotJsx}
     </div>
   );
