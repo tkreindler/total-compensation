@@ -39,6 +39,8 @@ This process could probably be automated way better but I'm no expert with Node 
 This is just a hobby project so I'm probably gonna leave it as is but there are a lot of potential avenues for improvement:
 
 - Make the form UI not horrible looking
+- Add a cpi based inflation line to the chart
+    - I initially intended to do this but the 'cpi' python package I usually use for this sort of thing has some issues right now so I didn't do it (yet)
 - Support multiple employers in sequence (possibly overlapping)
 - Handle more edge cases and strange payment arrangements as people report them
 
