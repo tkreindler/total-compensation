@@ -2,7 +2,6 @@ import { useState } from "react";
 import Form from "./Form";
 import RequestPayload, { defaultRequestPayload } from "./RequestPayload";
 import { useCookies } from "react-cookie";
-import PlotlyPlot from "./Plot";
 
 interface State
 {

@@ -817,24 +817,11 @@ const Form: React.FC<Props> = ({ initialState, submitCallback, saveCallback }) =
             <button type="button" onClick={async () => await downloadPayload(state.payload)}>
                 Export
             </button>
-            <label htmlFor="import-button">
-                <span
-                    style={{
-                        display: "inline-block",
-                        padding: "6px 12px",
-                        cursor: "pointer",
-                        borderRadius: "4px",
-                        backgroundColor: "#2196f3",
-                        color: "white",
-                        fontSize: "14px",
-                        fontWeight: "bold",
-                    }}
-                >
-                    Upload JSON
-                </span>
-            </label>
+            <button type="button" onClick={() => document.getElementById('import-button-hidden')!.click()}>
+                Import
+            </button>
             <input
-                id="import-button"
+                id="import-button-hidden"
                 type="file"
                 onChange={importPayload}
                 style={{ display: "none" }}
