@@ -1,0 +1,15 @@
+### Get BLS Data
+POST https://api.bls.gov/publicAPI/v1/timeseries/data/
+Content-Type: application/json
+
+{
+    "seriesid":
+    [
+        // see https://www.bls.gov/help/hlpforma.htm
+        
+        // CPI-U
+        "CUUR0000SA0L1E"
+    ],
+    "startyear": "2020",
+    "endyear": "2025"
+}
