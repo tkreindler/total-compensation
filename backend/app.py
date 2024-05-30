@@ -22,7 +22,7 @@ if DISABLE_INFLATION == None:
 else:
     DISABLE_INFLATION = DISABLE_INFLATION.lower() == "true"
 
-cpi_inflater_cache: dict[float, inflater] = {}
+cpi = inflater()
 
 # Create a Flask app instance, serving static assets
 app = Flask(__name__, static_folder=STATIC_ROOT, static_url_path="/static/")
@@ -59,8 +59,11 @@ def api():
     totalPaySeries = getTotalPaySeries(data, serieses=series)
     series.append(totalPaySeries)
 
-    if not(DISABLE_INFLATION):
-        series.append(getInflationAdjustedStartingPaySeries(data, totalPaySeries))
+    try:
+        if not(DISABLE_INFLATION):
+            series.append(getInflationAdjustedStartingPaySeries(data, totalPaySeries))
+    except Exception as e:
+        print("Skipping inflation line due to exception: \n%s" % str(e))
     
     # get preloaded response json
     return json.dumps(series, default=str)
@@ -99,9 +102,6 @@ def getInflationAdjustedStartingPaySeries(data: dict, totalPaySeries: dict) -> d
     endDate = dparser.parse(data["misc"]["endDate"])
 
     predictedInflation = data["misc"]["predictedInflation"]
-    if predictedInflation not in cpi_inflater_cache:
-        cpi_inflater_cache[predictedInflation] = inflater(predictedInflation=predictedInflation)
-    cpi = cpi_inflater_cache[predictedInflation]
 
     x = [x for x in pd.date_range(
         start=startDate,
@@ -111,27 +111,7 @@ def getInflationAdjustedStartingPaySeries(data: dict, totalPaySeries: dict) -> d
     startingPay = totalPaySeries["y"][0]
     startDate = x[0].date()
 
-    lastDate = None
-    lastValue = None
-
-    y = []
-    for date in x:
-        try:
-            pay = cpi.inflate(startingPay, startDate, date.date())
-
-            lastDate = date
-            lastValue = pay
-
-            y.append(pay)
-        except:
-            # use the predicted inflation value to extrapolate future dates it doesn't have yet
-            # assume 365.25 days in a year for simplicity
-            yearsPassed = (date - lastDate) / timedelta(days=365.25)
-
-            # assume continuously compounding interest for simplicity
-            pay = lastValue * (math.e ** (yearsPassed * (predictedInflation - 1)))
-
-            y.append(pay)
+    y = [cpi.inflate(startingPay, startDate, date.date(), predictedInflation=predictedInflation) for date in x]
 
     series = dict()
     series["name"] = "Inflation Adjusted Starting Pay"

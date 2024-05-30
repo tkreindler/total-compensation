@@ -19,7 +19,7 @@ class inflater:
     Sacrifices a little bit of speed upon initial execution for much lower memory usage
     and a far faster initialization time.
     """
-    def __init__(self, seriesId: str = 'CUUR0000SA0L1E', predictedInflation: float | None = None):
+    def __init__(self, seriesId: str = 'CUUR0000SA0L1E'):
         """
         Create an instance of inflater
 
@@ -28,23 +28,9 @@ class inflater:
         The identifier of the BLS CPI series to use
         CUUR0000SA0L1E is the default CPI-U but there are literally hundreds to choose from
         See https://www.bls.gov/help/hlpforma.htm
-
-        predictedInflation (float | None):
-        The predicted inflation to use for future calculations.
-        If "None" will throw on future calculations.
-        If 1.03 will assume 3% yearly inflation for all future dates without CPI data.
         """
 
         self.seriesId: str = seriesId
-        self.predictedInflation: float | None = predictedInflation
-        if self.predictedInflation != None and self.predictedInflation < 0.5:
-            raise Exception("""
-Predicted inflation value cannot be less than 0.5.
-Baseline is at 1, anything less than 1 would be deflation.
-For example, if you want 3 percent inflation use 1.03.
-
-Did you mean to add 1 from the value you used?
-""")
 
         # a dictionary of year -> array of cpi values by month
         self.cpi_data: dict[int, list[float | None]] = {}
@@ -65,7 +51,7 @@ Did you mean to add 1 from the value you used?
         self._consume_series(series)
 
 
-    def get_cpi_value(self, date: date) -> float:
+    def get_cpi_value(self, date: date, predictedInflation: float | None = None) -> float:
         """
         Get the CSI value from the BLS api for a specific date.
         Note that the accuracy is only monthly so the days on
@@ -75,12 +61,17 @@ Did you mean to add 1 from the value you used?
         date (date):
         The date to get the CPI value of (monthly accuracy).
 
+        predictedInflation (float | None):
+        The predicted inflation to use for future calculations.
+        If "None" will throw on future calculations.
+        If 1.03 will assume 3% yearly inflation for all future dates without CPI data.
+
         Returns:
         The value from the API in float form.
         """
 
         if date.year > self.latest_year or (date.year == self.latest_year and date.month > self.latest_month):
-            return self._get_predicted_cpi_value(date)
+            return self._get_predicted_cpi_value(date, predictedInflation)
         
         if date.year not in self.cpi_data:
             self._load_data_from_api(date.year)
@@ -116,9 +107,9 @@ Did you mean to add 1 from the value you used?
             raise Exception("CPI data for year %d still not found after requesting from the BLS API." % year)
 
 
-    def _get_predicted_cpi_value(self, date: date) -> float:
+    def _get_predicted_cpi_value(self, date: date, predictedInflation: float | None) -> float:
         """
-        If self.predictedInflation == None just throw - predicted inflation isn't enabled.
+        If predictedInflation == None just throw - predicted inflation isn't enabled.
 
         If it is enabled simply plug the values into the continuously compounding interest
         forumula and plug out an answer using the predicted inflation rate from the last month
@@ -127,20 +118,28 @@ Did you mean to add 1 from the value you used?
         Returns the cpi value in float form.
         """
 
-        if self.predictedInflation == None:
+        if predictedInflation == None:
             raise Exception("Predicting future inflation is not enabled. Can't process date %s. \
 Set a predictedInflation value in the constructor if you want this functionality." % str(date))
+        if predictedInflation < 0.5:
+            raise Exception("""
+Predicted inflation value cannot be less than 0.5.
+Baseline is at 1, anything less than 1 would be deflation.
+For example, if you want 3 percent inflation use 1.03.
+
+Did you mean to add 1 from the value you used?
+""")
         
         monthsDifference = (date.year - self.latest_year) * 12 + date.month - self.latest_month
         yearsDifference = monthsDifference / 12
-        r = self.predictedInflation - 1
+        r = predictedInflation - 1
 
         multiplier = math.e ** (r * yearsDifference)
         val = self.latest_value * multiplier
         return val
 
 
-    def inflate(self, value: float, startDate: date, endDate: date) -> float:
+    def inflate(self, value: float, startDate: date, endDate: date, predictedInflation: float | None = None) -> float:
         """
         Inflate a value (price) from the startDate and get its equivelant price
         at the endDate using CPI numbers from the BLS API.
@@ -154,14 +153,19 @@ Set a predictedInflation value in the constructor if you want this functionality
 
         endDate (date):
         The end date to adjust the price of value to.
+
+        predictedInflation (float | None):
+        The predicted inflation to use for future calculations.
+        If "None" will throw on future calculations.
+        If 1.03 will assume 3% yearly inflation for all future dates without CPI data.
         
         Returns:
         The corresponding inflated value at the endDate.
 
         """
         
-        startCpiVal = self.get_cpi_value(startDate)
-        endCpiVal = self.get_cpi_value(endDate)
+        startCpiVal = self.get_cpi_value(startDate, predictedInflation=predictedInflation)
+        endCpiVal = self.get_cpi_value(endDate, predictedInflation=predictedInflation)
 
         return value * endCpiVal / startCpiVal
 
