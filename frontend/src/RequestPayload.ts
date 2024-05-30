@@ -19,6 +19,7 @@ export interface Bonus {
 
 export interface Stock {
     name: string;
+    ticker: string;
     shares: number;
     startDate: string;
     endDate: string;
@@ -83,6 +84,7 @@ export const defaultRequestPayload: RequestPayload = {
     "stocks": [
         {
             "name": "On Hire Stock Award",
+            "ticker": "MSFT",
             "shares": 100,
             "startDate": "2022-01-10",
             "endDate": "2025-08-15"

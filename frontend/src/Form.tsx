@@ -258,7 +258,7 @@ const Form: React.FC<Props> = ({ initialState, submitCallback, saveCallback }) =
     {
         const updateBonus = (prevBonus: AnnualBonus) =>
         {
-            // shallow copy stock object
+            // shallow copy object
             const bonus: AnnualBonus = Object.assign({}, prevBonus)
 
             switch (event.target.name)
@@ -468,7 +468,7 @@ const Form: React.FC<Props> = ({ initialState, submitCallback, saveCallback }) =
     {
         const updatePay = (prevPay: Pay) =>
         {
-            // shallow copy stock object
+            // shallow copy object
             const pay: Pay = Object.assign({}, prevPay)
 
             switch (event.target.name)
@@ -592,9 +592,12 @@ const Form: React.FC<Props> = ({ initialState, submitCallback, saveCallback }) =
     // Create a function to handle adding a new input field
     const addStock = () =>
     {
+        const ticker = state.payload.stocks.at(-1)?.ticker ?? "MSFT";
+
         const newStock: Stock =
         {
             name: "",
+            ticker: ticker,
             shares: 0,
             startDate: "2022-01-10",
             endDate: "2022-01-10",
@@ -643,6 +646,10 @@ const Form: React.FC<Props> = ({ initialState, submitCallback, saveCallback }) =
                     stock.name = event.target.value;
                     break;
 
+                case "ticker":
+                    stock.ticker = event.target.value;
+                    break;
+
                 case "shares":
                     stock.shares = +event.target.value;
                     break;
@@ -656,6 +663,7 @@ const Form: React.FC<Props> = ({ initialState, submitCallback, saveCallback }) =
                     break;
 
                 default:
+                    console.error("Unknown target " + event.target.name)
                     break;
             }
 
@@ -697,6 +705,16 @@ const Form: React.FC<Props> = ({ initialState, submitCallback, saveCallback }) =
                         type="text"
                         name="name"
                         value={stock.name}
+                        onChange={(event) => handleStockChange(index, event)}
+                    />
+                </label>
+                <br />
+                <label>
+                    <span>Ticker </span>
+                    <input
+                        type="text"
+                        name="ticker"
+                        value={stock.ticker}
                         onChange={(event) => handleStockChange(index, event)}
                     />
                 </label>

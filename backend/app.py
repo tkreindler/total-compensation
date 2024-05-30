@@ -42,11 +42,6 @@ def api():
     
     data = request.get_json()
 
-    predictedInflation = data["misc"]["predictedInflation"]
-
-    # object to track stock price live
-    tracker = price_tracker(predictedInflation=predictedInflation)
-
     series = []
 
     series.append(getBaseSeries(data))
@@ -54,7 +49,7 @@ def api():
     series.append(getSigningBonusSeries(data))
 
     for stock in data["stocks"]:
-        series.append(getStockSeries(stock, tracker))
+        series.append(getStockSeries(stock, data))
 
     totalPaySeries = getTotalPaySeries(data, serieses=series)
     series.append(totalPaySeries)
@@ -124,7 +119,13 @@ def getInflationAdjustedStartingPaySeries(data: dict, totalPaySeries: dict) -> d
     return series
 
 
-def getStockSeries(stock: dict, tracker: price_tracker) -> dict:
+def getStockSeries(stock: dict, data: dict) -> dict:
+    predictedInflation = data["misc"]["predictedInflation"]
+    ticker = stock["ticker"]
+
+    # object to track stock price live
+    tracker = price_tracker(predictedInflation, ticker)
+
     startDate = dparser.parse(stock["startDate"])
     endDate = dparser.parse(stock["endDate"])
 
