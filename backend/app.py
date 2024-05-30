@@ -105,6 +105,7 @@ def getTotalPaySeries(data: {}, serieses: []):
     series["name"] = "Total Pay"
     series["x"] = x
     series["y"] = y
+    series["visible"] = "legendonly"
     series["type"] = "scatter"
     series["line"] = { "shape": "hv" }
 
