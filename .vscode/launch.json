@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        // debug back end
         {
             "name": "Python: Flask",
             "type": "python",
@@ -21,6 +22,7 @@
             "jinja": true,
             "justMyCode": true
         },
+        // debug front end
         {
             "type": "msedge",
             "request": "launch",
@@ -28,6 +30,13 @@
             "url": "http://localhost:3000",
             "webRoot": "${workspaceFolder}"
         },
-
+        // just for module debugging
+        {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
     ]
 }

@@ -1,7 +1,10 @@
+# load environment variables first
+from dotenv import load_dotenv
+load_dotenv()
+
 # Import Flask and render_template
 from flask import Flask, request
 from flask_cors import cross_origin
-import yfinance
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import dateutil.parser as dparser
@@ -9,46 +12,17 @@ import os
 import json
 import pandas as pd
 import math
-from dotenv import load_dotenv
-
-load_dotenv()
+from cpi import inflater
+from stocks import price_tracker
 
 STATIC_ROOT = os.getenv('STATIC_ROOT')
+DISABLE_INFLATION = os.getenv('DISABLE_INFLATION')
+if DISABLE_INFLATION == None:
+    DISABLE_INFLATION = False
+else:
+    DISABLE_INFLATION = DISABLE_INFLATION.lower() == "true"
 
-print("Loading yfinance ticker, this might take a while...")
-ticker = yfinance.Ticker("MSFT")
-print("Finished loading yfinance ticker")
-
-currentPrice = ticker.info["currentPrice"]
-
-# refresh cpi data
-print("Updating cpi data, this might take a while...")
-import cpi
-
-class price_tracker:
-    def __init__(self, predictedInflation):
-        # Get the ticker object
-        self.predictedInflation = predictedInflation
-        
-        self.cutOffDate = None
-
-    def get_price(self, date):
-        if self.cutOffDate and date > self.cutOffDate:
-            yearsSince = (date - self.cutOffDate).days / 365
-
-            return currentPrice * (self.predictedInflation ** yearsSince)
-
-        # Get the historical data for the date
-        data = ticker.history(start=date, end=date + relativedelta(days=7))
-
-        if not(data.empty):
-            price = data["Close"].iloc[0]
-
-            return price
-        
-        # make it more efficient by storing this as the last allowed date in perpetuity
-        self.cutOffDate = date
-        return currentPrice
+cpi_inflater_cache: dict[float, inflater] = {}
 
 # Create a Flask app instance, serving static assets
 app = Flask(__name__, static_folder=STATIC_ROOT, static_url_path="/static/")
@@ -85,12 +59,13 @@ def api():
     totalPaySeries = getTotalPaySeries(data, serieses=series)
     series.append(totalPaySeries)
 
-    series.append(getInflationAdjustedStartingPaySeries(data, totalPaySeries))
+    if not(DISABLE_INFLATION):
+        series.append(getInflationAdjustedStartingPaySeries(data, totalPaySeries))
     
     # get preloaded response json
     return json.dumps(series, default=str)
 
-def getTotalPaySeries(data: {}, serieses: []):
+def getTotalPaySeries(data: dict, serieses: list) -> dict:
     startDate = dparser.parse(data["misc"]["startDate"])
     endDate = dparser.parse(data["misc"]["endDate"])
 
@@ -119,11 +94,14 @@ def getTotalPaySeries(data: {}, serieses: []):
 
     return series
 
-def getInflationAdjustedStartingPaySeries(data: {}, totalPaySeries: {}):
+def getInflationAdjustedStartingPaySeries(data: dict, totalPaySeries: dict) -> dict:
     startDate = dparser.parse(data["misc"]["startDate"])
     endDate = dparser.parse(data["misc"]["endDate"])
 
     predictedInflation = data["misc"]["predictedInflation"]
+    if predictedInflation not in cpi_inflater_cache:
+        cpi_inflater_cache[predictedInflation] = inflater(predictedInflation=predictedInflation)
+    cpi = cpi_inflater_cache[predictedInflation]
 
     x = [x for x in pd.date_range(
         start=startDate,
@@ -166,7 +144,7 @@ def getInflationAdjustedStartingPaySeries(data: {}, totalPaySeries: {}):
     return series
 
 
-def getStockSeries(stock: {}, tracker: price_tracker):
+def getStockSeries(stock: dict, tracker: price_tracker) -> dict:
     startDate = dparser.parse(stock["startDate"])
     endDate = dparser.parse(stock["endDate"])
 
@@ -186,7 +164,7 @@ def getStockSeries(stock: {}, tracker: price_tracker):
     return series
 
 
-def getSigningBonusSeries(data: {}):
+def getSigningBonusSeries(data: dict) -> dict:
     startDate = dparser.parse(data["misc"]["startDate"])
 
     duration = relativedelta(
@@ -217,7 +195,7 @@ def getSigningBonusSeries(data: {}):
     return series
 
 # Base pay switch statment, put promotions here as they come
-def get_base_pay(date: datetime, sortedPay: list):
+def get_base_pay(date: datetime, sortedPay: list) -> float:
 
     for tup in sortedPay:
         startDate = dparser.parse(tup["startDate"])
@@ -228,7 +206,7 @@ def get_base_pay(date: datetime, sortedPay: list):
         
     return 0
 
-def getBaseSeries(data: {}):
+def getBaseSeries(data: dict) -> dict:
     startDate = dparser.parse(data["misc"]["startDate"])
     endDate = dparser.parse(data["misc"]["endDate"])
 
@@ -253,7 +231,7 @@ def getBaseSeries(data: {}):
     return series
 
 # Base pay switch statment, put promotions here as they come
-def get_annual_bonus_pay(date: datetime, sortedPay: list, sortedBonuses: list, default: float):
+def get_annual_bonus_pay(date: datetime, sortedPay: list, sortedBonuses: list, default: float) -> float:
 
     base_pay = get_base_pay(date=date, sortedPay=sortedPay)
 
@@ -267,7 +245,7 @@ def get_annual_bonus_pay(date: datetime, sortedPay: list, sortedBonuses: list, d
         
     return base_pay * multiplier
 
-def getAnnualBonusSeries(data: {}):
+def getAnnualBonusSeries(data: dict) -> dict:
     startDate = dparser.parse(data["misc"]["startDate"])
     endDate = dparser.parse(data["misc"]["endDate"])
     default = data["bonus"]["annual"]["default"]
