@@ -81,7 +81,7 @@ const Form: React.FC<Props> = ({ initialState, submitCallback, saveCallback }) =
             </label>
             <br />
             <label>
-                <span>Predicted future inflation (for stock price prediction) </span>
+                <span>Predicted future inflation (for stock price prediction and more) </span>
                 <input
                     type="number"
                     name="predictedInflation"

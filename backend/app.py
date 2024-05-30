@@ -2,12 +2,13 @@
 from flask import Flask, request
 from flask_cors import cross_origin
 import yfinance
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import dateutil.parser as dparser
 import os
 import json
 import pandas as pd
+import math
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -19,6 +20,10 @@ ticker = yfinance.Ticker("MSFT")
 print("Finished loading yfinance ticker")
 
 currentPrice = ticker.info["currentPrice"]
+
+# refresh cpi data
+print("Updating cpi data, this might take a while...")
+import cpi
 
 class price_tracker:
     def __init__(self, predictedInflation):
@@ -77,7 +82,10 @@ def api():
     for stock in data["stocks"]:
         series.append(getStockSeries(stock, tracker))
 
-    series.append(getTotalPaySeries(data, serieses=series))
+    totalPaySeries = getTotalPaySeries(data, serieses=series)
+    series.append(totalPaySeries)
+
+    series.append(getInflationAdjustedStartingPaySeries(data, totalPaySeries))
     
     # get preloaded response json
     return json.dumps(series, default=str)
@@ -103,6 +111,52 @@ def getTotalPaySeries(data: {}, serieses: []):
 
     series = dict()
     series["name"] = "Total Pay"
+    series["x"] = x
+    series["y"] = y
+    series["visible"] = "legendonly"
+    series["type"] = "scatter"
+    series["line"] = { "shape": "hv" }
+
+    return series
+
+def getInflationAdjustedStartingPaySeries(data: {}, totalPaySeries: {}):
+    startDate = dparser.parse(data["misc"]["startDate"])
+    endDate = dparser.parse(data["misc"]["endDate"])
+
+    predictedInflation = data["misc"]["predictedInflation"]
+
+    x = [x for x in pd.date_range(
+        start=startDate,
+        end=endDate,
+        freq="MS")]
+    
+    startingPay = totalPaySeries["y"][0]
+    startDate = x[0].date()
+
+    lastDate = None
+    lastValue = None
+
+    y = []
+    for date in x:
+        try:
+            pay = cpi.inflate(startingPay, startDate, date.date())
+
+            lastDate = date
+            lastValue = pay
+
+            y.append(pay)
+        except:
+            # use the predicted inflation value to extrapolate future dates it doesn't have yet
+            # assume 365.25 days in a year for simplicity
+            yearsPassed = (date - lastDate) / timedelta(days=365.25)
+
+            # assume continuously compounding interest for simplicity
+            pay = lastValue * (math.e ** (yearsPassed * (predictedInflation - 1)))
+
+            y.append(pay)
+
+    series = dict()
+    series["name"] = "Inflation Adjusted Starting Pay"
     series["x"] = x
     series["y"] = y
     series["visible"] = "legendonly"
