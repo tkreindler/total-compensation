@@ -116,16 +116,6 @@ const PlotlyPlot: React.FC<Props> = ({ request }) =>
     };
 
     const data: any[] = [...plotData.response]
-    
-    // format the series with the desired style
-    for (const dict of data)
-    {
-        dict.stackgroup = "one";
-        dict.type = "scatter";
-        dict.line = {
-            "shape": "hv"
-        };
-    }
 
     return (
         <div>

@@ -4,3 +4,4 @@ pandas==2.1.4
 plotly==5.18.0
 python-dotenv==1.0.0
 yfinance==0.2.33
+cpi==1.1.5

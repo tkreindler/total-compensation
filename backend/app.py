@@ -76,9 +76,40 @@ def api():
 
     for stock in data["stocks"]:
         series.append(getStockSeries(stock, tracker))
+
+    series.append(getTotalPaySeries(data, serieses=series))
     
     # get preloaded response json
     return json.dumps(series, default=str)
+
+def getTotalPaySeries(data: {}, serieses: []):
+    startDate = dparser.parse(data["misc"]["startDate"])
+    endDate = dparser.parse(data["misc"]["endDate"])
+
+    x = [x for x in pd.date_range(
+        start=startDate,
+        end=endDate,
+        freq="MS")]
+    y = []
+    for date in x:
+        total = 0
+        for other in serieses:
+            try:
+                i = other["x"].index(date)
+                total += other["y"][i]
+            except:
+                pass
+        y.append(total)
+
+    series = dict()
+    series["name"] = "Total Pay"
+    series["x"] = x
+    series["y"] = y
+    series["type"] = "scatter"
+    series["line"] = { "shape": "hv" }
+
+    return series
+
 
 def getStockSeries(stock: {}, tracker: price_tracker):
     startDate = dparser.parse(stock["startDate"])
@@ -93,6 +124,9 @@ def getStockSeries(stock: {}, tracker: price_tracker):
     series["name"] = stock["name"]
     series["x"] = x
     series["y"] = y
+    series["stackgroup"] = "one"
+    series["type"] = "scatter"
+    series["line"] = { "shape": "hv" }
 
     return series
 
@@ -121,6 +155,9 @@ def getSigningBonusSeries(data: {}):
     series["name"] = data["bonus"]["signing"]["name"]
     series["x"] = x
     series["y"] = y
+    series["stackgroup"] = "one"
+    series["type"] = "scatter"
+    series["line"] = { "shape": "hv" }
 
     return series
 
@@ -154,6 +191,9 @@ def getBaseSeries(data: {}):
     series["name"] = data["base"]["name"]
     series["x"] = x
     series["y"] = y
+    series["stackgroup"] = "one"
+    series["type"] = "scatter"
+    series["line"] = { "shape": "hv" }
 
     return series
 
@@ -194,6 +234,9 @@ def getAnnualBonusSeries(data: {}):
     series["name"] = data["bonus"]["annual"]["name"]
     series["x"] = x
     series["y"] = y
+    series["stackgroup"] = "one"
+    series["type"] = "scatter"
+    series["line"] = { "shape": "hv" }
 
     return series
 
