@@ -1,4 +1,4 @@
-FROM python:3.12-alpine as backend
+FROM python:3.13-alpine AS backend
 
 RUN pip install --upgrade pip
 
@@ -9,7 +9,7 @@ COPY backend/requirements.txt /backend/requirements.txt
 RUN pip install -r /backend/requirements.txt
 
 # install WSGI server
-RUN pip install waitress
+RUN pip install waitress==3.0.0
 
 # copy remaining files
 COPY backend/ /backend/
@@ -18,7 +18,7 @@ COPY backend/ /backend/
 RUN echo "STATIC_ROOT=/frontend/" > /backend/.env
 
 
-FROM node:20-alpine AS frontend
+FROM node:23-alpine AS frontend
 
 WORKDIR /build
 
@@ -39,7 +39,7 @@ COPY --from=frontend /build/build/* /frontend/
 
 WORKDIR /backend
 
-ENV PORT 8000
+ENV PORT=8000
 
 # run the server
-CMD waitress-serve --host 0.0.0.0 --port ${PORT} app:app
+ENTRYPOINT waitress-serve --host 0.0.0.0 --port ${PORT} app:app
