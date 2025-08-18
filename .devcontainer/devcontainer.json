@@ -8,8 +8,7 @@
 	"features": {
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {
 			"version": "latest",
-			"enableNonRootDocker": "true",
-			"moby": "true"
+			"enableNonRootDocker": "true"
 		},
 		"ghcr.io/devcontainers/features/node:1":
 		{
