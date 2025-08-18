@@ -18,7 +18,7 @@ COPY backend/ /backend/
 RUN echo "STATIC_ROOT=/frontend/" > /backend/.env
 
 
-FROM node:23-alpine AS frontend
+FROM node:lts-alpine AS frontend
 
 WORKDIR /build
 
