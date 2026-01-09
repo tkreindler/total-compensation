@@ -1,4 +1,4 @@
-FROM python:3.13-alpine AS backend
+FROM python:3.14-alpine AS backend
 
 RUN pip install --upgrade pip
 
@@ -9,7 +9,7 @@ COPY backend/requirements.txt /backend/requirements.txt
 RUN pip install -r /backend/requirements.txt
 
 # install WSGI server
-RUN pip install waitress==3.0.0
+RUN pip install waitress==3.0.2
 
 # copy remaining files
 COPY backend/ /backend/

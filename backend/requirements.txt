@@ -1,6 +1,6 @@
-Flask==3.1.1
-flask_cors==6.0.1
-pandas==2.3.1
-plotly==6.3.0
-python-dotenv==1.1.1
-yfinance~=0.2.65
+Flask==3.1.2
+flask_cors==6.0.2
+pandas==2.3.3
+plotly==6.5.1
+python-dotenv==1.2.1
+yfinance==1.0
