@@ -27,7 +27,7 @@ const PlotlyPlot: React.FC<Props> = ({ request }) =>
     const doAsyncRequest = async (request: RequestPayload) =>
     {
         // hit the API to do the processing
-        const response = await fetch("/api/v1.0/plot/", {
+        const response = await fetch("localhost:5000/api/v1.0/plot/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

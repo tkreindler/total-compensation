@@ -22,7 +22,11 @@ if DISABLE_INFLATION == None:
 else:
     DISABLE_INFLATION = DISABLE_INFLATION.lower() == "true"
 
-cpi = inflater()
+def get_cpi_instance() -> inflater:
+    global cpi
+    if cpi is None:
+        cpi = inflater()
+    return cpi
 
 # Create a Flask app instance, serving static assets
 app = Flask(__name__, static_folder=STATIC_ROOT, static_url_path="/static/")
@@ -105,6 +109,8 @@ def getInflationAdjustedStartingPaySeries(data: dict, totalPaySeries: dict) -> d
     
     startingPay = totalPaySeries["y"][0]
     startDate = x[0].date()
+
+    cpi = get_cpi_instance()
 
     y = [cpi.inflate(startingPay, startDate, date.date(), predictedInflation=predictedInflation) for date in x]
 
