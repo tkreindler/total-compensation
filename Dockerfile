@@ -42,4 +42,4 @@ WORKDIR /backend
 ENV PORT=8000
 
 # run the server
-ENTRYPOINT waitress-serve --host 0.0.0.0 --port ${PORT} app:app
+ENTRYPOINT ["sh", "-c", "waitress-serve --host 0.0.0.0 --port ${PORT} app:app"]

@@ -98,14 +98,20 @@ const PlotlyPlot: React.FC<Props> = ({ request }) =>
     }
     
     const layout: Partial<Plotly.Layout> = {
-        title: "Total Compensation",
+        title: {
+            text: "Total Compensation"
+        },
         xaxis: {
-            title: "Date",
+            title: {
+                text: "Date"
+            },
             type: 'date',
             range: [plotData.response[0].x[0], request.misc.endDate],
         },
         yaxis: {
-            title: "Money (USD)",
+            title: {
+                text: "Money (USD)"
+            },
             tickprefix: "$",
             tickformat: ",.2f",
             automargin: true,

@@ -44,9 +44,12 @@ class inflater:
 
         series = self._process_bls_response(response)
 
-        self.latest_year = int(series[0]["year"])
-        self.latest_month = int(series[0]["period"][1:])
-        self.latest_value = float(series[0]["value"])
+        # Find the first entry with a valid value (not '-')
+        latest_entry = next((x for x in series if x["value"] != '-'), series[0])
+        
+        self.latest_year = int(latest_entry["year"])
+        self.latest_month = int(latest_entry["period"][1:])
+        self.latest_value = float(latest_entry["value"])
         
         self._consume_series(series)
 
@@ -214,6 +217,9 @@ Did you mean to add 1 from the value you used?
 
             for x in series_for_year:
                 month = int(x["period"][1:])
+                # Skip entries with missing data (represented as '-')
+                if x["value"] == '-':
+                    continue
                 value = float(x["value"])
 
                 latest_year_data[month - 1] = value
