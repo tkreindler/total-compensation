@@ -16,8 +16,32 @@ class price_tracker:
 
         # Get the ticker object
         self.predictedInflation = predictedInflation
-        self.currentPrice: float = self.ticker.info["currentPrice"]
-        
+
+        # Try to get current price from various possible fields
+        info = self.ticker.info
+
+        # Validate we got actual ticker data (invalid tickers lack 'symbol' field)
+        if "symbol" not in info or info.get("symbol") is None:
+            raise ValueError(
+                f"Invalid or delisted ticker symbol: '{ticker}'. "
+                f"Please verify the ticker symbol is correct and actively traded."
+            )
+
+        self.currentPrice: float | None = (
+            info.get("currentPrice") or
+            info.get("regularMarketPrice") or
+            info.get("previousClose")
+        )
+
+        if self.currentPrice is None or self.currentPrice <= 0:
+            raise ValueError(
+                f"Could not fetch current price for ticker '{ticker}'. "
+                f"The ticker may be delisted, have no trading activity, or be invalid. "
+                f"Available price data: currentPrice={info.get('currentPrice')}, "
+                f"regularMarketPrice={info.get('regularMarketPrice')}, "
+                f"previousClose={info.get('previousClose')}"
+            )
+
         self.cutOffDate: date | None = None
 
     def get_price(self, date: date) -> float:
