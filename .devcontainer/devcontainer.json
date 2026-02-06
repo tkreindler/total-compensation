@@ -20,8 +20,8 @@
 		}
 	},
 
-	// Install Claude Code globally after container creation
-	"postCreateCommand": "npm install -g @anthropic-ai/claude-code"
+	// Install Claude Code and Chrome after container creation
+	"postCreateCommand": "npm install -g @anthropic-ai/claude-code && wget -q -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && sudo apt-get update && sudo dpkg -i /tmp/chrome.deb || true && sudo apt-get install -f -y"
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],

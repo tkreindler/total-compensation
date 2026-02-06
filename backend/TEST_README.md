@@ -10,6 +10,9 @@ Fast unit tests with mocked dependencies for rapid development feedback.
 ### 2. End-to-End Functional Tests (`test_e2e.py`) - 18 tests
 Slow integration tests that make real API calls to validate actual system behavior.
 
+### 3. Full-Stack Selenium Tests (`test_selenium_e2e.py`) - 2 tests
+Browser-based tests that validate the complete frontend + backend flow including UI interactions and chart rendering.
+
 ## Test Coverage
 
 ### Unit Tests (`test_app.py`)
@@ -56,6 +59,23 @@ The E2E test suite includes **18 tests** covering:
 
 **Note:** E2E tests require network connectivity and are slower (~30-60 seconds total).
 
+### Full-Stack Selenium Tests (`test_selenium_e2e.py`)
+
+The Selenium test suite includes **2 tests** covering:
+
+- **Complete UI Flow** - Loads page, verifies form, clicks submit, validates chart
+- **Chart Rendering** - Validates Plotly chart renders with interactive elements
+- **Screenshot Capture** - Saves before/after screenshots for visual validation
+- **Real Browser Testing** - Tests in actual Chrome/Chromium browser environment
+
+**Requirements:**
+- Chrome or Chromium browser installed
+- Frontend must be built (`npm run build` in frontend directory)
+- Network connectivity for real API calls
+- ~30-60 seconds per test run
+
+**Note:** These tests are skipped automatically if Chrome/Chromium is not available.
+
 ## Running Tests
 
 ### Run Only Fast Unit Tests (Recommended for Development)
@@ -67,6 +87,18 @@ pytest test_app.py
 ### Run Only E2E Tests (Real API Calls)
 ```bash
 pytest test_e2e.py -v
+```
+
+### Run Only Selenium Tests (Full-Stack Browser Tests)
+```bash
+# Requires Chrome/Chromium and built frontend
+cd frontend && npm run build && cd ../backend
+pytest test_selenium_e2e.py -v -s
+```
+
+### Skip Selenium Tests
+```bash
+pytest -m "not selenium"  # Runs all tests except Selenium
 ```
 
 ### Run All Tests
