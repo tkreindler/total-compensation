@@ -22,6 +22,8 @@ if DISABLE_INFLATION == None:
 else:
     DISABLE_INFLATION = DISABLE_INFLATION.lower() == "true"
 
+cpi = None
+
 def get_cpi_instance() -> inflater:
     global cpi
     if cpi is None:

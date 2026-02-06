@@ -3,4 +3,4 @@ flask_cors==6.0.2
 pandas==2.3.3
 plotly==6.5.1
 python-dotenv==1.2.1
-yfinance==1.0
+yfinance==1.1.0
