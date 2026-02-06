@@ -124,6 +124,21 @@ const PlotlyPlot: React.FC<Props> = ({ request }) =>
 
     const data: any[] = [...plotData.response]
 
+    // Style the inflation line to be visible and distinctive
+    for (const series of data) {
+        if (series.name && series.name.includes("Inflation")) {
+            series.visible = true;  // Make visible by default
+            series.line = {
+                ...series.line,
+                dash: "dash",  // Dashed line style
+                color: "orange",  // Distinctive color
+                width: 2
+            };
+            // Don't include in stack group
+            delete series.stackgroup;
+        }
+    }
+
     return (
         <div>
             <Plot style={{width: "90%", left: "auto", right: "auto"}}
