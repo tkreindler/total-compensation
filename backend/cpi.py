@@ -81,8 +81,10 @@ class inflater:
 
         val: float | None = self.cpi_data[date.year][date.month - 1]
         if val == None:
-            raise Exception("Value was unexpected null")
-        
+            # If we have a null value in the historical data (e.g., BLS hasn't released it yet),
+            # fall back to predicted inflation
+            return self._get_predicted_cpi_value(date, predictedInflation)
+
         return val
             
             

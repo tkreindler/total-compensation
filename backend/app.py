@@ -31,7 +31,9 @@ def get_cpi_instance() -> inflater:
     return cpi
 
 # Create a Flask app instance, serving static assets
-app = Flask(__name__, static_folder=STATIC_ROOT, static_url_path="/static/")
+# Note: static_url_path="" means files in static_folder are served from root
+# This allows /static/js/file.js to map to build/static/js/file.js
+app = Flask(__name__, static_folder=STATIC_ROOT, static_url_path="")
 
 # serve index.html as the root path
 @app.route('/')

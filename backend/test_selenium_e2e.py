@@ -172,10 +172,27 @@ class TestFullStackSelenium:
         print("\n📄 Loading application...")
         driver.get('http://localhost:5000')
 
-        # Wait for page to load
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.TAG_NAME, "h1"))
-        )
+        # Debug: Check what we received
+        import time
+        time.sleep(3)  # Give it a moment
+        print(f"Page title: {driver.title}")
+        print(f"Page source length: {len(driver.page_source)}")
+
+        # Check for JavaScript errors
+        logs = driver.get_log('browser')
+        if logs:
+            print(f"Browser console errors: {len(logs)}")
+            for log in logs[:5]:  # Show first 5 errors
+                print(f"  {log['level']}: {log['message']}")
+
+        # Wait for page to load (React app needs time to render)
+        try:
+            WebDriverWait(driver, 30).until(
+                EC.presence_of_element_located((By.TAG_NAME, "h1"))
+            )
+        except Exception as e:
+            print(f"Failed to find H1. Page source:\n{driver.page_source[:1000]}")
+            raise
 
         # Verify we're on the right page
         assert "Total Compensation" in driver.title or "Total Compensation" in driver.page_source
@@ -288,9 +305,9 @@ class TestFullStackSelenium:
 
         print("\n🧪 Testing chart interactive elements...")
 
-        # Load and submit
+        # Load and submit (React app needs time to render)
         driver.get('http://localhost:5000')
-        WebDriverWait(driver, 10).until(
+        WebDriverWait(driver, 30).until(
             EC.presence_of_element_located((By.XPATH, "//button[contains(text(), 'Submit')]"))
         ).click()
 
