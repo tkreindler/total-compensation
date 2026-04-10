@@ -2,7 +2,7 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/docker-in-docker
 {
 	"name": "Docker DevContainer",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile{
 	"image": "mcr.microsoft.com/devcontainers/base:ubuntu",
 
 	"features": {
@@ -10,18 +10,23 @@
 			"version": "latest",
 			"enableNonRootDocker": "true"
 		},
-		"ghcr.io/devcontainers/features/node:1":
-		{
+		"ghcr.io/devcontainers/features/node:1": {
 			"version": "latest"
 		},
-		"ghcr.io/devcontainers/features/python:1":
-		{
+		"ghcr.io/devcontainers/features/python:1": {
 			"version": "latest"
 		}
 	},
 
-	// Install Claude Code and Chrome after container creation
-	"postCreateCommand": "npm install -g @anthropic-ai/claude-code && wget -q -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && sudo apt-get update && sudo dpkg -i /tmp/chrome.deb || true && sudo apt-get install -f -y"
+	// Install Claude Code and additional dependencies after container creation
+	"postCreateCommand": "bash ${containerWorkspaceFolder}/.devcontainer/post-create.sh",
+
+	"mounts": [
+		"source=persistent-claude-data,target=/home/vscode/claude-persistent,type=volume"
+	],
+
+	// Create needed symlinks and such after each container start
+	"postStartCommand": "bash ${containerWorkspaceFolder}/.devcontainer/post-start.sh"
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
