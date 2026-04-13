@@ -35,7 +35,7 @@ RUN npm run build
 FROM backend
 
 # copy over frontend from build container
-COPY --from=frontend /build/build/* /frontend/
+COPY --from=frontend /build/build/ /frontend/
 
 WORKDIR /backend
 
